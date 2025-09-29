@@ -1,73 +1,41 @@
-# React + TypeScript + Vite
+# 🌍 EcoTrack – Carbon Footprint Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Frontend](https://img.shields.io/badge/Frontend-React-blue.svg)](https://reactjs.org/) 
+[![Backend](https://img.shields.io/badge/Backend-Node.js-yellow.svg)](https://nodejs.org/) 
+[![Database](https://img.shields.io/badge/Database-MongoDB-brightgreen.svg)](https://www.mongodb.com/) 
+[![Status](https://img.shields.io/badge/Status-In%20Development-orange.svg)]()
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌱 About the Project
+**EcoTrack** is a modern web application that helps users **track daily activities** and estimate their **carbon footprint**.  
+The app aims to **increase environmental awareness** and encourage **sustainable lifestyle habits**.  
 
-## React Compiler
+> “Small daily actions make a big difference!” 🌿
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ✨ Features
+- 📝 **Daily Questionnaire**: Covers transportation, food, energy, consumption, and recycling  
+- 📊 **Carbon Footprint Calculation**: Instant calculation of your daily CO₂ emissions  
+- 📈 **Statistics**: Weekly and monthly charts  
+- 🔑 **Authentication**: JWT-based user login  
+- ☁️ **Cloud Storage**: MongoDB for data persistence  
+- 📱 **Responsive Design**: Works on desktop and mobile  
+- 🌐 **Future-ready**: Multi-language support  
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Technologies Used
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+| Layer | Tech |
+|-------|------|
+| Frontend | React, Typescript, Vite, Tailwind Css, |
+| State Management | Redux / Context API |
+| Backend | Node.js, Express.js |
+| Database | MongoDB + Mongoose |
+| Authentication | JWT |
+| Styling | CSS Modules |
+| Charts | Recharts / Chart.js |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
