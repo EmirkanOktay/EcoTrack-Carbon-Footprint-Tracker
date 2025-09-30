@@ -1,8 +1,16 @@
+import background from "../../Images/background1.png";
 
 const HomePage = () => {
     return (
-        <div>HomePage</div>
-    )
-}
+        <div
+            className="relative min-h-screen w-full pt-16 bg-cover bg-center"
+            style={{ backgroundImage: `url(${background})` }}
+        >
+            <div className="absolute inset-0 bg-black/40"></div>
 
-export default HomePage
+
+        </div>
+    );
+};
+
+export default HomePage;

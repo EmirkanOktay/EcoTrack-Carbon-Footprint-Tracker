@@ -3,7 +3,6 @@ import HomeLayout from '../layout/HomeLayout';
 import HomePage from '../pages/home/HomePage';
 import AuthLayout from '../layout/AuthLayout';
 import LoginPage from '../pages/auth/login/LoginPage';
-import RegisterPage from '../pages/auth/register/RegisterPage';
 import ResetPassword from '../pages/auth/resetPassword/ResetPassword';
 import ProfileLayout from '../layout/ProfileLayout';
 import MyProfile from '../pages/profile/MyProfile';
@@ -13,18 +12,19 @@ import MyResults from '../pages/profile/MyResults';
 import MyBadges from '../pages/profile/MyBadges';
 import SettingsPage from '../pages/settings/SettingsPage';
 import MyGoals from '../pages/profile/myGoals';
+import ErrorPage from '../pages/Error';
+import SignUpPage from '../pages/auth/sign-up/SignUp';
 
 function AppRoutes() {
     return (
         <Routes>
-
             <Route path="/" element={<HomeLayout />}>
                 <Route index element={<HomePage />} />
             </Route>
 
             <Route path="/auth" element={<AuthLayout />}>
                 <Route path="login" element={<LoginPage />} />
-                <Route path="register" element={<RegisterPage />} />
+                <Route path="sign-up" element={<SignUpPage />} />
                 <Route path="reset-password" element={<ResetPassword />} />
             </Route>
 
@@ -37,7 +37,10 @@ function AppRoutes() {
                 <Route path="my-results/:id" element={<MyResults />} />
                 <Route path="settings" element={<SettingsPage />} />
             </Route>
+            <Route path='*' element={<ErrorPage />} />
         </Routes>
+
+
     );
 }
 

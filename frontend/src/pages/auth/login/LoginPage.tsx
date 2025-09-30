@@ -1,8 +1,7 @@
-import React from 'react'
 
 function LoginPage() {
     return (
-        <div>LoginPage</div>
+        <div className="pt-16">LoginPagaaae</div>
     )
 }
 

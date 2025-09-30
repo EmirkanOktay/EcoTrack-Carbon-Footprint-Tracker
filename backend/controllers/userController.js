@@ -58,4 +58,26 @@ const createUser = async (req, res) => {
 
 }
 
-module.exports = { createUser }
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const findUser = await User.findOne({ email: email })
+
+        if (!findUser) {
+            return res.status(400).json({ message: "User not found" })
+        }
+        else {
+            const validPassword = await bcrypt.compare(password, findUser.password);
+            if (!validPassword) {
+                return res.status(400).json({ message: "Wrong Password" })
+            }
+            res.status(201).json({ message: "Login Has Been Succesful" })
+        }
+
+    } catch (error) {
+        return res.status(400).json({ message: error.message })
+    }
+}
+
+module.exports = { createUser, login }
