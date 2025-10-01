@@ -13,7 +13,7 @@ export interface registerProps {
 
 export interface loginProps {
     email: string,
-    password: string
+    password: string,
 }
 
 export interface User {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import background from "../../../Images/background2.png";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
@@ -7,8 +7,15 @@ import type { loginProps } from "../../../types/user";
 import { loginUser, setUser } from "../../../api/userSlicer";
 import type { AppDispatch, RootState } from "../../../stores/Store";
 import { Eye, EyeOff } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 function LoginPage() {
+
+    const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+    const siteKey = import.meta.env.VITE_RECAPTCHA_SITEKEY;
+
+
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
@@ -18,12 +25,21 @@ function LoginPage() {
     const dispatch = useDispatch<AppDispatch>();
     const user = useSelector((state: RootState) => state.user.userData);
 
-    if (user) {
-        navigate("/profile");
-    }
+
+    useEffect(() => {
+        if (user) {
+            navigate("/profile");
+        }
+    }, [user, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const token = recaptchaRef.current?.getValue();
+        if (!token) {
+            toast.error("Please verify you're not a robot");
+            return;
+        }
 
         if (!email || !password) {
             toast.error("Please fill in all fields");
@@ -92,7 +108,13 @@ function LoginPage() {
                                 {showPassword ? <EyeOff /> : <Eye />}
                             </button>
                         </div>
+                        <div className="pt-5 flex justify-center">
+                            <ReCAPTCHA
+                                sitekey={siteKey}
+                                ref={recaptchaRef}
+                            />
 
+                        </div>
                     </div>
 
                     <button

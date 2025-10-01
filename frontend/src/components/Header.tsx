@@ -1,6 +1,6 @@
 import { useState } from "react";
 import logo from "../Images/logo.png";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -27,7 +27,7 @@ function Header() {
                             <Link to="/" className="text-white hover:text-green-300 duration-500">Home</Link>
                             <Link to="#about" className="text-white hover:text-green-300 duration-500">About</Link>
                             <Link to="#services" className="text-white hover:text-green-300 duration-500">Services</Link>
-                            <Link to="#term-and-conditions" className="text-white hover:text-green-300 duration-500">Term & Condition</Link>
+                            <Link to="/legal/terms-of-service" className="text-white hover:text-green-300 duration-500">Term & Service</Link>
                         </div>
                     ) : <></>}
 
@@ -45,8 +45,12 @@ function Header() {
                             </>
                         ) : (
                             <>
-                                <span className="text-white font-semibold">{user.name}</span>
-                                <button onClick={() => navigate(`/profile/my-profile/${user?._id}`)} className="px-4 py-2 border rounded-full text-white border-white/40 hover:bg-white/10 transition cursor-pointer">
+                                <button className="px-4 py-2 text-white cursor-pointer transition hover:shake">
+                                    <Bell />
+                                </button>
+
+
+                                <button onClick={() => navigate(`/profile/my-profile/${user._id}`)} className="px-4 py-2 border rounded-full text-white border-white/40 hover:bg-white/10 transition cursor-pointer">
                                     My Profile
                                 </button>
                                 <button onClick={handleLogout} className="px-4 py-2 border rounded-full text-white border-red-500 hover:bg-red-500/20 transition cursor-pointer">

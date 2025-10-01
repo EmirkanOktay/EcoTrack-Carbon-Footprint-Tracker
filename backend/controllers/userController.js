@@ -84,7 +84,20 @@ const login = async (req, res) => {
                 { expiresIn }
             );
 
-            res.status(201).json({ message: "Login Has Been Succesful", token })
+            res.status(201).json({
+                message: "Login Has Been Succesful",
+                token,
+                name: findUser.name,
+                lastname: findUser.lastname,
+                age: findUser.age,
+                email: findUser.email,
+                cartype: findUser.cartype,
+                joinDate: findUser.joinDate,
+                level: findUser.level,
+                xpCounter: findUser.xpCounter,
+                lastSeen: findUser.lastSeen,
+            });
+
         }
 
     } catch (error) {
@@ -108,16 +121,13 @@ const logout = (req, res) => {
 
 const getUserData = async (req, res) => {
     try {
-        const findUser = await User.findOne({ _id: req.auth.id });
-        if (!findUser) {
-            return res.status(400).json({ message: "error" })
-        }
-
-        return res.status(200).json(findUser)
-
+        const userId = req.params.id;
+        const findUser = await User.findOne({ _id: userId });
+        if (!findUser) return res.status(404).json({ message: "User not found" });
+        return res.status(200).json(findUser);
     } catch (error) {
-        return res.status(500).json({ error })
+        return res.status(500).json({ error });
     }
-}
+};
 
 module.exports = { createUser, login, logout, getUserData }

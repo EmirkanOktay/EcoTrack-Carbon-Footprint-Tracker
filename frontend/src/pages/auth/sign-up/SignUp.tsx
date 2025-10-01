@@ -1,14 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import background from "../../../Images/background1.png";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { registerUser } from "../../../api/userSlicer";
 import type { registerProps } from "../../../types/user";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../stores/Store";
 import { Eye, EyeOff } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 function SignUpPage() {
+
+    const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+    const siteKey = import.meta.env.VITE_RECAPTCHA_SITEKEY;
+
     const [name, setName] = useState<string>("");
     const [lastName, setLastName] = useState<string>("");
     const [age, setAge] = useState<number>(0);
@@ -27,6 +33,12 @@ function SignUpPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const token = recaptchaRef.current?.getValue();
+        if (!token) {
+            toast.error("Please verify you're not a robot");
+            return;
+        }
 
         if (!name || !lastName || !email || !password || !rePassword) {
             toast.error("Please fill in all fields");
@@ -54,6 +66,7 @@ function SignUpPage() {
         try {
             setLoading(true);
             const result = await dispatch(registerUser(user)).unwrap();
+
             if (result) {
                 toast.success("Account has been created");
                 navigate("/auth/login");
@@ -64,6 +77,7 @@ function SignUpPage() {
             setLoading(false);
         }
     };
+
 
     return (
         <div
@@ -170,6 +184,16 @@ function SignUpPage() {
                                 {showRePassword ? <EyeOff /> : <Eye />}
                             </button>
                         </div>
+
+                        <div className="pt-5 flex justify-center">
+                            <ReCAPTCHA
+                                sitekey={siteKey}
+                                ref={recaptchaRef}
+                            />
+
+                        </div>
+
+
                     </div>
 
                     <button
@@ -179,6 +203,7 @@ function SignUpPage() {
                     >
                         {loading ? "Creating..." : "Sign Up"}
                     </button>
+
                 </form>
 
                 <p className="text-sm text-center text-gray-700 mt-6">

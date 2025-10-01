@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import HomeLayout from '../layout/HomeLayout';
 import HomePage from '../pages/home/HomePage';
 import AuthLayout from '../layout/AuthLayout';
@@ -14,9 +14,13 @@ import SettingsPage from '../pages/settings/SettingsPage';
 import MyGoals from '../pages/profile/myGoals';
 import ErrorPage from '../pages/Error';
 import SignUpPage from '../pages/auth/sign-up/SignUp';
-import ContactUs from '../components/ContactUs';
 import { PrivateRoute } from './PrivateRouter';
 import { PublicRoute } from './PublicRouter';
+import LegalLayout from '../layout/LegalLayout';
+import CookiePolicy from '../pages/legal/CookiePolicy';
+import PrivacyPolicy from '../pages/legal/PrivacyPolicy';
+import Terms from '../pages/legal/Terms';
+import ContactUs from '../pages/home/ContactUs';
 
 function AppRoutes() {
     return (
@@ -32,15 +36,25 @@ function AppRoutes() {
                 <Route path="reset-password" element={<ResetPassword />} />
             </Route>
 
+
             <Route path="/profile" element={<ProfileLayout />}>
-                <Route path="my-profile/:id" element={<PrivateRoute><MyProfile /> </PrivateRoute>} />
-                <Route path="my-profile/:id/my-goals" element={<PrivateRoute><MyGoals /></PrivateRoute>} />
-                <Route path="my-profile/:id/my-badges" element={<PrivateRoute><MyBadges /></PrivateRoute>} />
-                <Route path="user-page/:id" element={<PrivateRoute><MyPage /></PrivateRoute>} />
+                <Route index element={<Navigate to="user-page" replace />} />
+                <Route path="user-page" element={<PrivateRoute><MyPage /></PrivateRoute>} />
+                <Route path="my-profile/:id" element={<PrivateRoute><MyProfile /></PrivateRoute>} />
+                <Route path="my-goals/:id" element={<PrivateRoute><MyGoals /></PrivateRoute>} />
+                <Route path="my-badges/:id" element={<PrivateRoute><MyBadges /></PrivateRoute>} />
                 <Route path="daily-questions" element={<PrivateRoute><DailyQuestions /></PrivateRoute>} />
                 <Route path="my-results/:id" element={<PrivateRoute><MyResults /></PrivateRoute>} />
                 <Route path="settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
             </Route>
+
+
+            <Route path='/legal' element={<LegalLayout />}>
+                <Route path='cookie-policy' element={<CookiePolicy />} />
+                <Route path='privacy-policy' element={<PrivacyPolicy />} />
+                <Route path='terms-of-service' element={<Terms />} />
+            </Route>
+
             <Route path='*' element={<ErrorPage />} />
         </Routes>
 
