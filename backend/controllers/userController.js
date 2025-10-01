@@ -6,10 +6,13 @@ const Notifactions = require("../models/notificationModel");
 const createUser = async (req, res) => {
     try {
 
-        const userHasAccount = await User.findOne({ email: req.body.email })
+        let userHasAccount = await User.findOne({ email: req.body.email });
+        if (userHasAccount) return res.status(409).send({ message: "User with given email already exist" })
 
         if (userHasAccount) {
-            return res.status(400).json({ message: "User already exist" })
+            if (userHasAccount) {
+                return res.status(400).json({ message: "User already exists" });
+            }
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -22,8 +25,9 @@ const createUser = async (req, res) => {
             email: req.body.email,
             password: password,
             joinDate: Date.now(),
-            cartype: req.body.carType,
-        })
+            cartype: req.body.cartype || "I don't have a car",
+        });
+
 
         const sendNotifyToNewUser = new Notifactions({
             user: user._id,
@@ -35,17 +39,16 @@ const createUser = async (req, res) => {
         await sendNotifyToNewUser.save();
         if (user) {
             res.status(201).json({
-                _id: user.id,
+                _id: user._id,
                 name: user.name,
-                lastName: user.lastName,
+                lastname: user.lastname,
                 age: user.age,
                 email: user.email,
-                password: user.password,
                 joinDate: user.joinDate,
-                carType: user.carType,
+                cartype: user.cartype,
                 token: jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" }),
-                notifyForNewUser: sendNotifyToNewUser
-            })
+                notifyForNewUser: sendNotifyToNewUser,
+            });
             console.log("user created!")
         }
         else {
@@ -72,7 +75,16 @@ const login = async (req, res) => {
             if (!validPassword) {
                 return res.status(400).json({ message: "Wrong Password" })
             }
-            res.status(201).json({ message: "Login Has Been Succesful" })
+
+            const expiresIn = req.body.rememberMe ? "7d" : "1h";
+
+            const token = jwt.sign(
+                { id: findUser._id, email: findUser.email },
+                process.env.JWT_SECRET,
+                { expiresIn }
+            );
+
+            res.status(201).json({ message: "Login Has Been Succesful", token })
         }
 
     } catch (error) {
@@ -80,4 +92,32 @@ const login = async (req, res) => {
     }
 }
 
-module.exports = { createUser, login }
+const logout = (req, res) => {
+    if (req.session) {
+        req.session.destroy(err => {
+            if (err) {
+                return res.status(500).json({ message: "Logout failed" });
+            }
+            return res.status(200).json({ message: "Logout successful" });
+        });
+    } else {
+        return res.status(400).json({ message: "No active session" });
+    }
+}
+
+
+const getUserData = async (req, res) => {
+    try {
+        const findUser = await User.findOne({ _id: req.auth.id });
+        if (!findUser) {
+            return res.status(400).json({ message: "error" })
+        }
+
+        return res.status(200).json(findUser)
+
+    } catch (error) {
+        return res.status(500).json({ error })
+    }
+}
+
+module.exports = { createUser, login, logout, getUserData }
