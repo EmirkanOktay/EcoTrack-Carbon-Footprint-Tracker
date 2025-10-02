@@ -1,7 +1,8 @@
-const User = require("../models/userModel");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const Notifactions = require("../models/notificationModel");
+import User from "../models/userModel.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import Notifactions from "../models/notificationModel.js";
+import { Resend } from "resend";
 
 const createUser = async (req, res) => {
     try {
@@ -119,15 +120,79 @@ const logout = (req, res) => {
 }
 
 
-const getUserData = async (req, res) => {
+
+const resetPasswordMail = async (req, res) => {
+    const resend = new Resend(process.env.SEND_MAIL_KEY);
+
     try {
-        const userId = req.params.id;
-        const findUser = await User.findOne({ _id: userId });
-        if (!findUser) return res.status(404).json({ message: "User not found" });
-        return res.status(200).json(findUser);
+        const { email } = req.body;
+        const findUser = await User.findOne({ email });
+
+        if (!findUser) {
+            return res.status(400).json({ message: "User not found" });
+        }
+        const token = jwt.sign(
+            { userId: findUser._id },
+            process.env.JWT_SECRET,
+            { expiresIn: "15m" }
+        );
+
+        const resetLink = `${process.env.CLIENT_URL || "http://localhost:5173"}/auth/reset-your-password/${token}`;
+
+        const mail = await resend.emails.send({
+            from: "EcoTrack <no-reply@ecotrack.com>",
+            to: email,
+            subject: "Reset Your Password",
+            html: `
+        <h2>Hello ${findUser.name || "User"},</h2>
+        <p>If you want to reset your password click the link below:</p>
+        <a href="${resetLink}" target="_blank"
+           style="display:inline-block;padding:10px 20px;
+           background:#16a34a;color:#fff;border-radius:8px;
+           text-decoration:none;font-weight:bold">
+           Reset Your Password
+        </a>
+        <p><b>Note:</b> This link is valid only for 15 minutes.</p>
+      `
+        });
+
+        return res.status(200).json({
+            message: "Reset password mail has been sent",
+            resetLink,
+            mailId: mail?.id || null
+        });
+
     } catch (error) {
-        return res.status(500).json({ error });
+        console.error("Resend error:", error);
+        return res.status(500).json({ message: "Something went wrong", error });
     }
 };
 
-module.exports = { createUser, login, logout, getUserData }
+
+const resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        if (!password) return res.status(400).json({ msg: "Password required" });
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await User.findById(decoded.userId);
+
+        if (!user) return res.status(404).json({ msg: "User not found" });
+
+        const encryptedPassword = await bcrypt.hash(password, 10);
+        user.password = encryptedPassword;
+        await user.save();
+
+        res.json({ msg: "Password updated successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({ msg: "Invalid or expired token" });
+    }
+};
+
+
+
+export { createUser, login, logout, resetPassword, resetPasswordMail };

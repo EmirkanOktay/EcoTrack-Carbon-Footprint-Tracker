@@ -16,6 +16,10 @@ export interface loginProps {
     password: string,
 }
 
+export interface resetPasswordProps {
+    email: string
+}
+
 export interface User {
     _id: number
     name: string,

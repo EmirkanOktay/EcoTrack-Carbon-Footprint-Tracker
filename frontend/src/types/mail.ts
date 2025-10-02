@@ -4,3 +4,7 @@ export interface MailProps {
     email: string,
     message: string
 }
+
+export interface resetPasswordProps {
+    email: string
+}

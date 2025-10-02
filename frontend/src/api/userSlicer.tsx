@@ -21,21 +21,6 @@ export const registerUser = createAsyncThunk(
     }
 );
 
-export const getUserData = createAsyncThunk(
-    "user/getUserData",
-    async (token: string, { rejectWithValue }) => {
-        try {
-            const response = await axios.get(`http://localhost:3000/api/user/get-user-data`, {
-                headers: { Authorization: `${token}` }
-            });
-            return response.data;
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || error.message);
-        }
-    }
-);
-
-
 export const loginUser = createAsyncThunk(
     "user/login",
     async (userData: loginProps, { rejectWithValue }) => {
@@ -44,6 +29,48 @@ export const loginUser = createAsyncThunk(
             return response.data;
         } catch (error: any) {
             return rejectWithValue(error.response.data.message);
+        }
+    }
+);
+
+export const sendResetPasswordLink = createAsyncThunk(
+    "user/resetPasswordLink",
+    async (email: string, { rejectWithValue }) => {
+        try {
+            const response = await axios.post(
+                "http://localhost:3000/api/user/reset-password-mail",
+                { email },
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message || "Something went wrong"
+            );
+        }
+    }
+);
+
+export const resetPassword = createAsyncThunk(
+    "user/resetPassword",
+    async (
+        { token, password }: { token: string; password: string },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await axios.put(
+                `http://localhost:3000/api/user/reset-password/${token}`,
+                { password },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message || "Something went wrong"
+            );
         }
     }
 );
@@ -92,19 +119,6 @@ const userSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-            .addCase(getUserData.pending, (state: userState) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(getUserData.fulfilled, (state: userState, action: PayloadAction<User>) => {
-                state.loading = false;
-                state.userData = action.payload;
-                state.error = null;
-            })
-            .addCase(getUserData.rejected, (state: userState, action) => {
-                state.loading = false;
-                state.error = action.payload as string;
-            });
     }
 });
 

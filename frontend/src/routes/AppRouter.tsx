@@ -21,6 +21,7 @@ import CookiePolicy from '../pages/legal/CookiePolicy';
 import PrivacyPolicy from '../pages/legal/PrivacyPolicy';
 import Terms from '../pages/legal/Terms';
 import ContactUs from '../pages/home/ContactUs';
+import ResetPasswordPage from '../pages/auth/resetPassword/resetPasswordPage';
 
 function AppRoutes() {
     return (
@@ -33,7 +34,8 @@ function AppRoutes() {
             <Route path="/auth" element={<AuthLayout />}>
                 <Route path="login" element={<PublicRoute><LoginPage /></PublicRoute>} />
                 <Route path="sign-up" element={<PublicRoute><SignUpPage /></PublicRoute>} />
-                <Route path="reset-password" element={<ResetPassword />} />
+                <Route path="reset-password" element={<PrivateRoute><ResetPassword /></PrivateRoute>} />
+                <Route path='forget-password' element={<ResetPasswordPage />} />
             </Route>
 
 
