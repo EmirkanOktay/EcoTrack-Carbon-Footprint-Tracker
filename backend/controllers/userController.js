@@ -111,8 +111,6 @@ const logout = (req, res) => {
     }
 }
 
-
-
 const resetPasswordMail = async (req, res) => {
     const resend = new Resend(process.env.SEND_MAIL_KEY);
 
@@ -126,7 +124,7 @@ const resetPasswordMail = async (req, res) => {
         const token = jwt.sign(
             { userId: findUser._id },
             process.env.JWT_SECRET,
-            { expiresIn: "15m" }
+            { expiresIn: "1d" }
         );
 
         const resetLink = `${process.env.CLIENT_URL || "http://localhost:5173"}/auth/reset-your-password/${token}`;
@@ -185,6 +183,47 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const resetPasswordFromProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: "Please provide both passwords" });
+        }
+
+        const user = await User.findById(id)
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: "Current password is incorrect" });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        const sendNotify = new Notifactions({
+            user: user._id,
+            title: "Your Password Has Been Changed",
+            message: `If you did not change password please change your password and secure your account`,
+        });
+
+        await sendNotify.save();
+
+        res.status(200).json({ message: "Password updated successfully" });
+
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+}
+
 const getUserInfos = async (req, res) => {
     try {
         const userId = req.params.id;
@@ -197,6 +236,10 @@ const getUserInfos = async (req, res) => {
                 email: findUser.email,
                 joinDate: findUser.joinDate,
                 cartype: findUser.cartype,
+                joinDate: findUser.joinDate,
+                level: findUser.level,
+                xpCounter: findUser.xpCounter,
+                lastSeen: findUser.lastSeen
             })
         }
     } catch (error) {
@@ -204,5 +247,36 @@ const getUserInfos = async (req, res) => {
     }
 }
 
+const updateUser = async (req, res) => {
+    try {
+        const { name, lastname, age, email, cartype } = req.body;
+        const userId = req.params.id;
 
-export { createUser, login, logout, resetPassword, resetPasswordMail, getUserInfos };
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        user.name = name ?? user.name;
+        user.lastname = lastname ?? user.lastname;
+        user.age = age ?? user.age;
+        user.email = email ?? user.email;
+        user.cartype = cartype ?? user.cartype;
+
+        await user.save();
+
+        const sendNotify = new Notifactions({
+            user: user._id,
+            title: "Your Personal Details Has Been Changed",
+            message: `If you did not change please change your password and secure your account`,
+        });
+
+        await sendNotify.save();
+
+        res.status(200).json({ message: "User updated successfully", user });
+    } catch (error) {
+        res.status(500).json({ message: "Something went wrong", error: error.message });
+    }
+};
+
+
+export { createUser, login, logout, resetPassword, resetPasswordMail, getUserInfos, resetPasswordFromProfile, updateUser };

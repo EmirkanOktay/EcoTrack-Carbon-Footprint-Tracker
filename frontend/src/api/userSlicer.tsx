@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import axios from 'axios';
-import type { loginProps, registerProps, User, userState } from '../types/user';
+import type { loginProps, registerProps, User, UserDetails, userState } from '../types/user';
 
 
 const initialState: userState = {
@@ -38,7 +38,6 @@ export const getUser = createAsyncThunk(
     async (userId: string, { rejectWithValue }) => {
         try {
             const token = JSON.parse(localStorage.getItem("user") || "{}").token;
-
             const response = await axios.get(
                 `http://localhost:3000/api/user/get-user/${userId}`,
                 {
@@ -72,6 +71,51 @@ export const sendResetPasswordLink = createAsyncThunk(
         }
     }
 );
+
+export const resetPasswordById = createAsyncThunk(
+    "user/resetPasswordById",
+    async (
+        {
+            id,
+            currentPassword,
+            newPassword,
+        }: { id: string; currentPassword: string; newPassword: string },
+        { rejectWithValue }
+    ) => {
+        try {
+            const token = localStorage.getItem("user");
+            const response = await axios.put(
+                `http://localhost:3000/api/user/reset-password-by-id/${id}`,
+                { currentPassword, newPassword },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message);
+        }
+    }
+);
+export const updateUser = createAsyncThunk(
+    "user/updateUser",
+    async ({ id, updatedUser }: { id: string; updatedUser: UserDetails }, { rejectWithValue }) => {
+        try {
+            const response = await axios.put(`http://localhost:3000/api/user/update-user/${id}`, updatedUser, {
+
+            });
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Something went wrong");
+        }
+    }
+);
+
+
+
 
 export const resetPassword = createAsyncThunk(
     "user/resetPassword",

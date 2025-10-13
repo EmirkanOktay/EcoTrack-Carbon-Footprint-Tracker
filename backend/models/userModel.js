@@ -10,8 +10,7 @@ const Schema = mongoose.Schema({
     cartype: {
         type: String,
         trim: true,
-        lowercase: true,
-        enum: ["electric", "hybrid", "gasoline", "i don't have a car"],
+        enum: ["Electric", "Hybrid", "Gasoline", "I don't have a car"],
         default: "I don't have a car"
     },
 

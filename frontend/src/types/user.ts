@@ -34,6 +34,15 @@ export interface User {
     lastSeen: Date,
 }
 
+export interface UserDetails {
+    name: string,
+    lastname: string,
+    age: number | string
+    email: string;
+    cartype: string;
+}
+
+
 export interface userState {
     userData: User | null,
     error: string | null,

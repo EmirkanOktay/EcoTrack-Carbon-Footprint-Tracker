@@ -10,8 +10,6 @@ import type { User } from "../../types/user";
 
 function MyPage() {
     const dispatch = useDispatch<AppDispatch>();
-
-
     const [loading, setLoading] = useState<boolean>(false);
     const user = useSelector((state: RootState) => state.user.userData);
     const [userDatas, setUserDatas] = useState<User | null>(null);
