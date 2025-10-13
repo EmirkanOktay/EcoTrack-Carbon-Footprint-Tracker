@@ -87,16 +87,8 @@ const login = async (req, res) => {
 
             res.status(201).json({
                 message: "Login Has Been Succesful",
+                id: findUser._id,
                 token,
-                name: findUser.name,
-                lastname: findUser.lastname,
-                age: findUser.age,
-                email: findUser.email,
-                cartype: findUser.cartype,
-                joinDate: findUser.joinDate,
-                level: findUser.level,
-                xpCounter: findUser.xpCounter,
-                lastSeen: findUser.lastSeen,
             });
 
         }
@@ -193,6 +185,24 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const getUserInfos = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const findUser = await User.findById(userId);
+        if (findUser) {
+            res.status(200).json({
+                name: findUser.name,
+                lastname: findUser.lastname,
+                age: findUser.age,
+                email: findUser.email,
+                joinDate: findUser.joinDate,
+                cartype: findUser.cartype,
+            })
+        }
+    } catch (error) {
+        res.status(500).json({ error: error })
+    }
+}
 
 
-export { createUser, login, logout, resetPassword, resetPasswordMail };
+export { createUser, login, logout, resetPassword, resetPasswordMail, getUserInfos };

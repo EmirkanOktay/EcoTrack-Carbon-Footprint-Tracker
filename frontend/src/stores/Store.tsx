@@ -1,9 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit"
 import userSlicer from "../api/userSlicer"
-
+import notifySlicer from "../api/notifySlicer"
 export const store = configureStore({
     reducer: {
-        user: userSlicer
+        user: userSlicer,
+        notifications: notifySlicer
     }
 });
 

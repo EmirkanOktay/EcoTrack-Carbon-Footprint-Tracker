@@ -33,6 +33,29 @@ export const loginUser = createAsyncThunk(
     }
 );
 
+export const getUser = createAsyncThunk(
+    "user/getUser",
+    async (userId: string, { rejectWithValue }) => {
+        try {
+            const token = JSON.parse(localStorage.getItem("user") || "{}").token;
+
+            const response = await axios.get(
+                `http://localhost:3000/api/user/get-user/${userId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+);
+
+
 export const sendResetPasswordLink = createAsyncThunk(
     "user/resetPasswordLink",
     async (email: string, { rejectWithValue }) => {

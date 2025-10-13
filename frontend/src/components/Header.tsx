@@ -1,104 +1,263 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import logo from "../Images/logo.png";
 import { Menu, X, Bell } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { getAllNotifications, markAllNotificationsRead } from "../api/notifySlicer";
+import type { AppDispatch } from "../stores/Store";
+import Loading from "./Loading";
+import type { notifyProps } from "../types/notify";
 
 function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [notifications, setNotifications] = useState<notifyProps[]>([]);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+
+    const drawerRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
     const { user, handleLogout } = useAuth();
+    const userId = user?._id || JSON.parse(localStorage.getItem("user") || "{}").id;
+    const dispatch = useDispatch<AppDispatch>();
+
+    const getNotifications = async () => {
+        if (!user) return;
+        setLoading(true);
+        try {
+            const result = await dispatch(getAllNotifications());
+            if ("payload" in result && result.payload) {
+                setNotifications(result.payload);
+            }
+        } catch (error) {
+            console.error("Error fetching notifications:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const markAllRead = async () => {
+        if (notifications.some((n) => !n.read)) {
+            try {
+                await dispatch(markAllNotificationsRead()).unwrap();
+
+                setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+            } catch (err) {
+                console.error("Failed to mark notifications as read:", err);
+            }
+        }
+    };
+
+    const handleDrawerToggle = async () => {
+        const newState = !drawerOpen;
+        setDrawerOpen(newState);
+
+        if (newState) {
+            try {
+                const updatedNotifications = await dispatch(markAllNotificationsRead()).unwrap();
+
+                setNotifications(updatedNotifications);
+            } catch (err) {
+                console.error("Failed to mark notifications as read:", err);
+            }
+        }
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
+                setDrawerOpen(false);
+            }
+        };
+        if (drawerOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [drawerOpen]);
+
+    useEffect(() => {
+        getNotifications();
+    }, []);
+
+    useEffect(() => {
+        markAllRead()
+    }, [])
+
+    if (loading) return <Loading />;
+
+    const unreadCount = notifications.filter((n) => !n.read).length;
 
     return (
-        <nav className="fixed w-full z-20 bg-black/10 backdrop-blur-md">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16 items-center">
-                    <div className="flex-shrink-0">
-                        <a href="/" className="flex items-center gap-x-2">
+        <>
+            <nav className="fixed w-full z-20 bg-black/10 backdrop-blur-md shadow-md">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-16 items-center">
+
+                        <Link to="/" className="flex items-center gap-x-2">
                             <img src={logo} alt="Logo" className="h-14 w-auto" />
-                            <span className="text-2xl font-bold text-white font-roboto">
-                                EcoTrack
-                            </span>
-                        </a>
-                    </div>
-                    {!user ? (
-                        <div className="hidden md:flex space-x-8 items-center">
-                            <Link to="/" className="text-white hover:text-green-300 duration-500">Home</Link>
-                            <Link to="#about" className="text-white hover:text-green-300 duration-500">About</Link>
-                            <Link to="#services" className="text-white hover:text-green-300 duration-500">Services</Link>
-                            <Link to="/legal/terms-of-service" className="text-white hover:text-green-300 duration-500">Term & Service</Link>
+                            <span className="text-2xl font-bold text-white font-roboto">EcoTrack</span>
+                        </Link>
+
+                        {!user ? (
+                            <div className="hidden md:flex space-x-8 items-center text-white">
+                                <Link to="/" className="hover:text-green-300 duration-300">Home</Link>
+                                <Link to="#about" className="hover:text-green-300 duration-300">About</Link>
+                                <Link to="#services" className="hover:text-green-300 duration-300">Services</Link>
+                                <Link to="/legal/terms-of-service" className="hover:text-green-300 duration-300">Term & Service</Link>
+                            </div>
+                        ) : null}
+
+                        <div className="hidden md:flex space-x-4 items-center relative">
+                            {!user ? (
+                                <>
+                                    <button
+                                        onClick={() => navigate("/auth/login")}
+                                        className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold bg-white/10 hover:bg-white/20 transition-all duration-300"
+                                    >
+                                        Login
+                                    </button>
+                                    <button
+                                        onClick={() => navigate("/auth/sign-up")}
+                                        className="px-8 py-2 border border-green-600 rounded-full bg-green-500 text-white font-semibold hover:bg-green-600 transition-all duration-300"
+                                    >
+                                        Sign Up
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={handleDrawerToggle}
+                                        className="relative px-4 py-2 text-white cursor-pointer transition hover:scale-105"
+                                    >
+                                        <Bell size={24} />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
+                                                {unreadCount}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    <button
+                                        onClick={() => navigate(`/profile/my-profile/${userId}`)}
+                                        className="px-4 py-2 border rounded-full text-white border-white/40 hover:bg-white/10 transition cursor-pointer"
+                                    >
+                                        My Profile
+                                    </button>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="px-4 py-2 border rounded-full text-white border-red-500 hover:bg-red-500/20 transition cursor-pointer"
+                                    >
+                                        Logout
+                                    </button>
+                                </>
+                            )}
                         </div>
-                    ) : <></>}
 
+                        <div className="md:hidden flex items-center space-x-2">
+                            {user && (
+                                <button
+                                    onClick={handleDrawerToggle}
+                                    className="relative px-2 py-1 text-white cursor-pointer"
+                                >
+                                    <Bell size={24} />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
+                                            {unreadCount}
+                                        </span>
+                                    )}
+                                </button>
+                            )}
+                            <button onClick={() => setMenuOpen(!menuOpen)} className="text-white focus:outline-none">
+                                {menuOpen ? <X size={28} /> : <Menu size={28} />}
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-                    <div className="hidden md:flex space-x-4">
+                {menuOpen && (
+                    <div className="md:hidden bg-black/10 backdrop-blur-md px-6 py-4 space-y-4 text-center text-white">
+                        <Link to="/" className="block hover:text-green-300 duration-300">Home</Link>
+                        <Link to="#about" className="block hover:text-green-300 duration-300">About</Link>
+                        <Link to="#services" className="block hover:text-green-300 duration-300">Services</Link>
+                        <Link to="#term-and-condition" className="block hover:text-green-300 duration-300">Term & Condition</Link>
+
                         {!user ? (
                             <>
-                                <button onClick={() => navigate("/auth/login")} className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold bg-white/10 backdrop-blur-md hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer">
+                                <button
+                                    onClick={() => navigate("/auth/login")}
+                                    className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold bg-white/10 hover:bg-white/20 transition-all duration-300"
+                                >
                                     Login
                                 </button>
-
-                                <button onClick={() => navigate("/auth/sign-up")} className="px-8 py-2 border border-green-600 rounded-full bg-green-500 text-white font-semibold hover:bg-green-600 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
+                                <button
+                                    onClick={() => navigate("/auth/sign-up")}
+                                    className="px-8 py-2 border border-green-600 rounded-full bg-green-500 text-white font-semibold hover:bg-green-600 transition-all duration-300"
+                                >
                                     Sign Up
                                 </button>
                             </>
                         ) : (
                             <>
-                                <button className="px-4 py-2 text-white cursor-pointer transition hover:shake">
-                                    <Bell />
-                                </button>
-
-
-                                <button onClick={() => navigate(`/profile/my-profile/${user._id}`)} className="px-4 py-2 border rounded-full text-white border-white/40 hover:bg-white/10 transition cursor-pointer">
+                                <button
+                                    onClick={() => navigate(`/profile/my-profile/${user._id}`)}
+                                    className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold hover:bg-white/10 transition"
+                                >
                                     My Profile
                                 </button>
-                                <button onClick={handleLogout} className="px-4 py-2 border rounded-full text-white border-red-500 hover:bg-red-500/20 transition cursor-pointer">
+                                <button
+                                    onClick={handleLogout}
+                                    className="px-8 py-2 border border-red-500 rounded-full text-white font-semibold hover:bg-red-500/20 transition"
+                                >
                                     Logout
                                 </button>
                             </>
                         )}
                     </div>
+                )}
+            </nav>
 
-                    <div className="md:hidden flex items-center">
-                        <button onClick={() => setMenuOpen(!menuOpen)} className="text-white focus:outline-none">
-                            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+            <div className={`fixed inset-0 z-40 flex justify-end pointer-events-none transition-opacity duration-300 ${drawerOpen ? "pointer-events-auto" : ""}`}>
+                <div
+                    onClick={() => setDrawerOpen(false)}
+                    className={`fixed inset-0 bg-black/40 transition-opacity duration-300 ${drawerOpen ? "opacity-100" : "opacity-0"}`}
+                />
+                <div
+                    ref={drawerRef}
+                    className={`relative w-80 max-w-full h-full bg-white shadow-xl transform transition-transform duration-300 ${drawerOpen ? "translate-x-0" : "translate-x-full"}`}
+                >
+                    <div className="flex justify-between items-center px-4 py-4 border-b">
+                        <h2 className="font-semibold text-lg">Notifications</h2>
+                        <button onClick={() => setDrawerOpen(false)} className="text-gray-600 hover:text-gray-900">
+                            <X size={24} />
                         </button>
+                    </div>
+
+                    <div className="overflow-y-auto max-h-full">
+                        {notifications.length === 0 ? (
+                            <div className="p-4 text-center text-gray-500">No notifications</div>
+                        ) : (
+                            notifications.map((n) => (
+                                <div
+                                    key={n._id}
+                                    className={`px-4 py-3 border-b cursor-pointer hover:bg-gray-100 ${!n.read ? "bg-orange-100 font-semibold" : ""}`}
+                                    onClick={() => {
+                                        setDrawerOpen(false);
+                                        navigate(n.link || "/");
+                                    }}
+                                >
+                                    <div>{n.title}</div>
+                                    <div className="text-sm text-gray-600">{n.message}</div>
+                                    <div className="text-xs text-gray-400 mt-0.5">
+                                        {n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
-
-            {menuOpen && (
-                <div className="md:hidden bg-black/10 backdrop-blur-md px-6 py-4 space-y-4 text-center text-white">
-                    <a href="/" className="block hover:text-green-300 duration-500">Home</a>
-                    <a href="#about" className="block hover:text-green-300 duration-500">About</a>
-                    <a href="#services" className="block hover:text-green-300 duration-500">Services</a>
-                    <a href="#term-and-condition" className="block hover:text-green-300 duration-500">Term & Condition</a>
-
-                    <div className="flex flex-col gap-3 pt-3">
-                        {!user ? (
-                            <>
-                                <button onClick={() => navigate("/auth/login")} className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold bg-white/10 backdrop-blur-md hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer">
-                                    Login
-                                </button>
-                                <button onClick={() => navigate("/auth/sign-up")} className="px-8 py-2 border border-green-600 rounded-full bg-green-500 text-white font-semibold hover:bg-green-600 hover:scale-105 hover:shadow-md transition-all duration-300 cursor-pointer">
-                                    Sign Up
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button onClick={() => navigate(`/profile/my-profile/${user._id}`)} className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold hover:bg-white/10 transition">
-                                    My Profile
-                                </button>
-                                <button onClick={handleLogout} className="px-8 py-2 border border-red-500 rounded-full text-white font-semibold hover:bg-red-500/20 transition">
-                                    Logout
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-        </nav>
+        </>
     );
 }
 
