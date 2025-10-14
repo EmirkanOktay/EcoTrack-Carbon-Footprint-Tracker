@@ -1,7 +1,14 @@
 import logo from "../Images/logo.png";
 import { Facebook, Instagram, X, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
+
 function Footer() {
+    const scrollToSection = (id: string) => {
+        const section = document.getElementById(id);
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth" });
+        }
+    };
 
     return (
         <footer className="bg-gradient-to-r from-green-950 via-black to-green-950 text-gray-300">
@@ -22,10 +29,10 @@ function Footer() {
                 <div>
                     <h3 className="font-semibold text-green-400 mb-4 uppercase tracking-wide">Explore</h3>
                     <ul className="space-y-2">
-                        <li><Link to="#about" className="hover:text-green-300 transition-colors">About Us</Link></li>
-                        <li><Link to="#mission" className="hover:text-green-300 transition-colors">Our Mission</Link></li>
-                        <li><Link to="#success" className="hover:text-green-300 transition-colors">Success Stories</Link></li>
-                        <li><Link to="#collaborations" className="hover:text-green-300 transition-colors">Collaborations</Link></li>
+                        <li><Link onClick={() => scrollToSection("about")} to="#about" className="hover:text-green-300 transition-colors">About Us</Link></li>
+                        <li><Link onClick={() => scrollToSection("mission")} to="#mission" className="hover:text-green-300 transition-colors">Our Mission</Link></li>
+                        <li><Link onClick={() => scrollToSection("success")} to="#success" className="hover:text-green-300 transition-colors">Success Stories</Link></li>
+                        <li><Link onClick={() => scrollToSection("collaborations")} to="#collaborations" className="hover:text-green-300 transition-colors">Collaborations</Link></li>
                     </ul>
                 </div>
 

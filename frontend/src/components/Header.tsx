@@ -10,6 +10,14 @@ import Loading from "./Loading";
 import type { notifyProps } from "../types/notify";
 
 function Header() {
+
+    const scrollToSection = (id: string) => {
+        const section = document.getElementById(id);
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
     const [menuOpen, setMenuOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [notifications, setNotifications] = useState<notifyProps[]>([]);
@@ -94,16 +102,16 @@ function Header() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
 
-                        <Link to="/" className="flex items-center gap-x-2">
+                        <Link onClick={() => scrollToSection("hero")} to="/" className="flex items-center gap-x-2">
                             <img src={logo} alt="Logo" className="h-14 w-auto" />
                             <span className="text-2xl font-bold text-white font-roboto">EcoTrack</span>
                         </Link>
 
                         {!user ? (
                             <div className="hidden md:flex space-x-8 items-center text-white">
-                                <Link to="/" className="hover:text-green-300 duration-300">Home</Link>
-                                <Link to="#about" className="hover:text-green-300 duration-300">About</Link>
-                                <Link to="#services" className="hover:text-green-300 duration-300">Services</Link>
+                                <Link onClick={() => scrollToSection("hero")} to="/" className="hover:text-green-300 duration-300">Home</Link>
+                                <Link onClick={() => scrollToSection("about")} to="#about" className="hover:text-green-300 duration-300">About</Link>
+                                <Link onClick={() => scrollToSection("mission")} to="#Our Mission" className="hover:text-green-300 duration-300">Our Mission</Link>
                                 <Link to="/legal/terms-of-service" className="hover:text-green-300 duration-300">Term & Service</Link>
                             </div>
                         ) : null}
@@ -113,13 +121,13 @@ function Header() {
                                 <>
                                     <button
                                         onClick={() => navigate("/auth/login")}
-                                        className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold bg-white/10 hover:bg-white/20 transition-all duration-300"
+                                        className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold bg-white/10 hover:bg-white/20 transition-all duration-300 cursor-pointer"
                                     >
                                         Login
                                     </button>
                                     <button
                                         onClick={() => navigate("/auth/sign-up")}
-                                        className="px-8 py-2 border border-green-600 rounded-full bg-green-500 text-white font-semibold hover:bg-green-600 transition-all duration-300"
+                                        className="px-8 py-2 border border-green-600 rounded-full bg-green-500 text-white font-semibold hover:bg-green-600 transition-all duration-300 cursor-pointer"
                                     >
                                         Sign Up
                                     </button>
@@ -177,22 +185,22 @@ function Header() {
 
                 {menuOpen && (
                     <div className="md:hidden bg-black/10 backdrop-blur-md px-6 py-4 space-y-4 text-center text-white">
-                        <Link to="/" className="block hover:text-green-300 duration-300">Home</Link>
-                        <Link to="#about" className="block hover:text-green-300 duration-300">About</Link>
-                        <Link to="#services" className="block hover:text-green-300 duration-300">Services</Link>
-                        <Link to="#term-and-condition" className="block hover:text-green-300 duration-300">Term & Condition</Link>
+                        <Link onClick={() => scrollToSection("hero")} to="/" className="hover:text-green-300 duration-300">Home</Link>
+                        <Link onClick={() => scrollToSection("about")} to="#about" className="hover:text-green-300 duration-300">About</Link>
+                        <Link onClick={() => scrollToSection("mission")} to="#Our Mission" className="hover:text-green-300 duration-300">Our Mission</Link>
+                        <Link to="/legal/terms-of-service" className="hover:text-green-300 duration-300">Term & Service</Link>
 
                         {!user ? (
                             <>
                                 <button
                                     onClick={() => navigate("/auth/login")}
-                                    className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold bg-white/10 hover:bg-white/20 transition-all duration-300"
+                                    className="px-8 py-2 border border-white/40 rounded-full text-white font-semibold bg-white/10 hover:bg-white/20 transition-all duration-300 cursor-pointer"
                                 >
                                     Login
                                 </button>
                                 <button
                                     onClick={() => navigate("/auth/sign-up")}
-                                    className="px-8 py-2 border border-green-600 rounded-full bg-green-500 text-white font-semibold hover:bg-green-600 transition-all duration-300"
+                                    className="px-8 py-2 border border-green-600 rounded-full bg-green-500 text-white font-semibold hover:bg-green-600 transition-all duration-300 cursor-pointer"
                                 >
                                     Sign Up
                                 </button>
