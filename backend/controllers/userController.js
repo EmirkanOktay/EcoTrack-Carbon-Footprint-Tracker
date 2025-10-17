@@ -77,7 +77,7 @@ const login = async (req, res) => {
                 return res.status(400).json({ message: "Wrong Password" })
             }
 
-            const expiresIn = req.body.rememberMe ? "7d" : "1h";
+            const expiresIn = req.body.rememberMe ? "7d" : "1d";
 
             const token = jwt.sign(
                 { id: findUser._id, email: findUser.email },
@@ -278,5 +278,5 @@ const updateUser = async (req, res) => {
     }
 };
 
-
+//delete account system will be add?
 export { createUser, login, logout, resetPassword, resetPasswordMail, getUserInfos, resetPasswordFromProfile, updateUser };

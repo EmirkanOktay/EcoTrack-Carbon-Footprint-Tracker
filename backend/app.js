@@ -1,6 +1,7 @@
 const express = require("express");
 const userRouter = require("./routes/userRouter");
 const NotificationRouter = require("./routes/NotificationRouter");
+const goalRouter = require("./routes/goalsRouter");
 require("dotenv").config();
 require("./config/db");
 const session = require('express-session');
@@ -40,6 +41,7 @@ app.get('/', (req, res) => {
 
 app.use("/api/user", userRouter);
 app.use("/api/notification", NotificationRouter)
+app.use("/api/goals", goalRouter)
 
 app.listen(process.env.PORT, () => {
     console.log("server is running")

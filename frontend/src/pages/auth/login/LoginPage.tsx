@@ -15,7 +15,6 @@ function LoginPage() {
 
     const siteKey = import.meta.env.VITE_RECAPTCHA_SITEKEY;
 
-
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
@@ -52,7 +51,16 @@ function LoginPage() {
             setLoading(true);
             const result = await dispatch(loginUser(userData)).unwrap();
             if (result) {
-                localStorage.setItem("user", JSON.stringify(result))
+
+                const expiresIn = result.expiresIn === "1d"
+                    ? 7 * 24 * 60 * 60 * 1000
+                    : 24 * 60 * 60 * 1000;
+
+                const now = Date.now();
+                const expiryTime = now + expiresIn;
+
+                localStorage.setItem("user", JSON.stringify(result));
+                localStorage.setItem("expiryTime", expiryTime.toString());
                 dispatch(setUser(result))
                 toast.success("Login Successful");
                 navigate("/profile");
@@ -64,11 +72,18 @@ function LoginPage() {
         }
     };
 
+    useEffect(() => {
+        const expiryTime = localStorage.getItem("expiryTime");
+
+        if (expiryTime && Date.now() > Number(expiryTime)) {
+            localStorage.clear();
+        }
+    }, [])
+
     return (
         <div
             className="relative min-h-screen w-full pt-16 bg-cover bg-center flex items-center justify-center"
-            style={{ backgroundImage: `url(${background})` }}
-        >
+            style={{ backgroundImage: `url(${background})` }}>
             <div className="bg-white/85 backdrop-blur-md shadow-2xl rounded-2xl p-8 w-full max-w-md mt-5 mb-5">
                 <h2 className="text-2xl font-bold text-center text-green-700 mb-6">
                     Login

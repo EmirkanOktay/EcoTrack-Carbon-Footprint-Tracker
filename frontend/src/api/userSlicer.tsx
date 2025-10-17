@@ -104,9 +104,7 @@ export const updateUser = createAsyncThunk(
     "user/updateUser",
     async ({ id, updatedUser }: { id: string; updatedUser: UserDetails }, { rejectWithValue }) => {
         try {
-            const response = await axios.put(`http://localhost:3000/api/user/update-user/${id}`, updatedUser, {
-
-            });
+            const response = await axios.put(`http://localhost:3000/api/user/update-user/${id}`, updatedUser, {});
             return response.data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || "Something went wrong");

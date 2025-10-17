@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import logo from "../Images/logo.png";
+import logo from "../../public/logo.png";
 import { Menu, X, Bell } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
