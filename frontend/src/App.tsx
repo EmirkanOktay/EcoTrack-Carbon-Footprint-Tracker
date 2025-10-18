@@ -10,6 +10,11 @@ import Loading from "./components/Loading";
 function App() {
   const { user } = useAuth();
   const [loading, setLoading] = useState<boolean>(true);
+  const token = JSON.parse(localStorage.getItem("user") || "{}").token;
+
+  if (!token) {
+    localStorage.clear();
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {

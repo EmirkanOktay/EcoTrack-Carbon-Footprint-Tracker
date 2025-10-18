@@ -74,7 +74,6 @@ function LoginPage() {
 
     useEffect(() => {
         const expiryTime = localStorage.getItem("expiryTime");
-
         if (expiryTime && Date.now() > Number(expiryTime)) {
             localStorage.clear();
         }

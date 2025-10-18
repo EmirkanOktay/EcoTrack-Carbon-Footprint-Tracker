@@ -38,6 +38,13 @@ export const getUser = createAsyncThunk(
     async (userId: string, { rejectWithValue }) => {
         try {
             const token = JSON.parse(localStorage.getItem("user") || "{}").token;
+
+            if (!token) {
+                localStorage.removeItem("user");
+                window.location.href = "/";
+                return rejectWithValue("No token provided");
+            }
+
             const response = await axios.get(
                 `http://localhost:3000/api/user/get-user/${userId}`,
                 {
@@ -46,9 +53,15 @@ export const getUser = createAsyncThunk(
                     },
                 }
             );
-
             return response.data;
-        } catch (error: any) {
+        }
+        catch (error: any) {
+            if (error.response?.status == 401) {
+                localStorage.removeItem("user");
+                localStorage.removeItem("expiryTime");
+                window.location.href = "/";
+                return rejectWithValue("Token Expired");
+            }
             return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
